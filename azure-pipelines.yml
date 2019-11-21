@@ -1,0 +1,34 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+stages:
+- stage: Pipeline
+  jobs:
+  - job: Build
+    steps:
+    - script: 'npm install'
+      displayName: 'Download Depedencies'
+
+    - script: 'npm run-script build'
+      displayName: 'Generate Artifact'
+    
+    - script: 'npm test'
+      displayName: 'Unit Test'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Pipeline Artifact'
+      inputs:
+        targetPath: dist
+        artifact: dist
+
+    - task: CopyFilesOverSSH@0
+      displayName: 'Securely copy files to the remote machine'
+      inputs:
+        sshEndpoint: 'tuya-mv'
+        sourceFolder: 'dist/exampleFront'
+        targetFolder: '/var/www/html/example-8082'
